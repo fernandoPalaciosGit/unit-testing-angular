@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { ImcTrainerMetricsService } from './imc-trainer-metrics.service';
-import { ImcLevel } from '../interfaces/im-weight-metrics';
+import { ImcLevel } from '../models/im-weight-metrics';
 
 describe('ImcTrainerMetricsService', () => {
   let service: ImcTrainerMetricsService;

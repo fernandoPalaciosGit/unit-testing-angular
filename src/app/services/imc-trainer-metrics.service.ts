@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ImcMetricLevel, ImcLevel } from '../interfaces/im-weight-metrics';
+import { ImcMetricLevel, ImcLevel } from '../models/im-weight-metrics';
 
 @Injectable({
   providedIn: 'root'
