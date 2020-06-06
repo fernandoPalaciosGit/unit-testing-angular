@@ -58,6 +58,10 @@ describe('ImcTrainerMetricsService', () => {
       it('With negative weight', () => {
         expect(ImcTrainerMetricsService.validate(-40, 1.65)).toBe(ImcLevel.NOT_FOUND);
       });
+
+      it('with a IMC over level controlled', () => {
+        expect(ImcTrainerMetricsService.validate(200, 1.30)).toBe(ImcLevel.NOT_FOUND);
+      });
     });
   });
 });
