@@ -1,10 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
-
 import { UserApiService } from './user-api.service';
 import { Person } from '../models/person';
 import { personMockResponse } from '../mocks/person-api';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpRequest } from '@angular/common/http';
 
 describe('UserApiService', () => {
   const urlApi = 'https://jsonplaceholder.typicode.com/users/';
@@ -34,7 +33,7 @@ describe('UserApiService', () => {
     expect(service).toBeTruthy();
   });
 
-  fdescribe('should subscribe API requests', () => {
+  describe('should subscribe API requests', () => {
     const errorMessage = 'Invalid request parameters';
     const errorResponse = { status: 400, statusText: 'Bad Request' };
     const httpObserver = {
@@ -51,37 +50,57 @@ describe('UserApiService', () => {
       spyOnAllFunctions(httpObserver);
     });
 
-    describe('when success request', () => {
-      afterEach(() => {
+    describe('getUserById()', () => {
+      const testRequest: HttpRequest<Partial<Person>> = new HttpRequest('GET', personRequestUrl);
+
+      beforeEach(() => {
+        service.getUserById(personRequestData.id).subscribe(httpObserver);
         request = httpTestingController.expectOne(personRequestUrl);
+      });
+
+      it('should verify request headers', () => {
+        request.flush(personMockResponse);
+        expect(request.request.method).toBe(testRequest.method);
+        expect(request.request.url).toBe(testRequest.url);
+      });
+
+      it('should success request', () => {
         request.flush(personMockResponse);
         expect(httpObserver.next).toHaveBeenCalled();
         expect(httpObserver.error).not.toHaveBeenCalled();
       });
 
-      it('get user', () => {
-        service.getUserById(personRequestData.id).subscribe(httpObserver);
-      });
-
-      it('update User', () => {
-        service.updateUserById(personRequestData).subscribe(httpObserver);
-      });
-    });
-
-    describe('when fail request', () => {
-      afterEach(() => {
-        request = httpTestingController.expectOne(personRequestUrl);
+      it('should fail request', () => {
         request.flush(errorMessage, errorResponse);
         expect(httpObserver.next).not.toHaveBeenCalled();
         expect(httpObserver.error).toHaveBeenCalled();
       });
+    });
 
-      it('get user', () => {
-        service.getUserById(personRequestData.id).subscribe(httpObserver);
+    describe('updateUserById()', () => {
+      const testRequest: HttpRequest<Partial<Person>> = new HttpRequest('POST', personRequestUrl, personRequestData);
+
+      beforeEach(() => {
+        service.updateUserById(personRequestData).subscribe(httpObserver);
+        request = httpTestingController.expectOne(personRequestUrl);
       });
 
-      it('update User', () => {
-        service.updateUserById(personRequestData).subscribe(httpObserver);
+      it('should verify request headers', () => {
+        request.flush(personMockResponse);
+        expect(request.request.method).toBe(testRequest.method);
+        expect(request.request.url).toBe(testRequest.url);
+      });
+
+      it('should success request', () => {
+        request.flush(personMockResponse);
+        expect(httpObserver.next).toHaveBeenCalled();
+        expect(httpObserver.error).not.toHaveBeenCalled();
+      });
+
+      it('should fail request', () => {
+        request.flush(errorMessage, errorResponse);
+        expect(httpObserver.next).not.toHaveBeenCalled();
+        expect(httpObserver.error).toHaveBeenCalled();
       });
     });
   });
