@@ -18,4 +18,8 @@ export class UserApiService {
   getUserById(id: number): Observable<Person> {
     return this.httpClient.get<Person>(UserApiService.getUser(id));
   }
+
+  updateUserById(person: Partial<Person>): Observable<Person> {
+    return this.httpClient.post<Person>(UserApiService.getUser(person.id), person);
+  }
 }

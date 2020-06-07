@@ -11,6 +11,11 @@ describe('UserApiService', () => {
   let service: UserApiService;
   let httpTestingController: HttpTestingController;
   let request: TestRequest;
+  const personRequestData: Partial<Person> = {
+    id: 2,
+    name: 'Paco'
+  };
+  const personRequestUrl = `${urlApi}/${personRequestData.id}`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -29,38 +34,55 @@ describe('UserApiService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('test get User data', () => {
-    const personId = 2;
-    const personGet = `${urlApi}/${personId}`;
-
-    it('should return user by id', () => {
-      const callbackSuccess = (person: Person) => {
-        expect(person.id).toBeDefined();
-        expect(person.username).toBeDefined();
-        expect(person.email).toBeDefined();
-        expect(person.phone).toBeDefined();
-      };
-      const httpObserver = { next: callbackSuccess };
-      spyOn(httpObserver, 'next');
-      service.getUserById(personId).subscribe(httpObserver);
-      request = httpTestingController.expectOne(personGet);
-      request.flush(personMockResponse);
-      expect(httpObserver.next).toHaveBeenCalled();
-    });
-
-    it('should throw error request', () => {
-      const errorMessage = 'Invalid request parameters';
-      const errorResponse = { status: 400, statusText: 'Bad Request' };
-      const callbackError = (data: HttpErrorResponse) => {
+  fdescribe('should subscribe API requests', () => {
+    const errorMessage = 'Invalid request parameters';
+    const errorResponse = { status: 400, statusText: 'Bad Request' };
+    const httpObserver = {
+      next: (data) => {
+        expect(data).toBe(personMockResponse);
+      },
+      error: (data: HttpErrorResponse) => {
         expect(data.error).toBe(errorMessage);
         expect(data.status).toBe(errorResponse.status);
-      };
-      const httpObserver = { error: callbackError };
-      spyOn(httpObserver, 'error');
-      service.getUserById(personId).subscribe(httpObserver);
-      request = httpTestingController.expectOne(personGet);
-      request.flush(errorMessage, errorResponse);
-      expect(httpObserver.error).toHaveBeenCalled();
+      }
+    };
+
+    beforeEach(() => {
+      spyOnAllFunctions(httpObserver);
+    });
+
+    describe('when success request', () => {
+      afterEach(() => {
+        request = httpTestingController.expectOne(personRequestUrl);
+        request.flush(personMockResponse);
+        expect(httpObserver.next).toHaveBeenCalled();
+        expect(httpObserver.error).not.toHaveBeenCalled();
+      });
+
+      it('get user', () => {
+        service.getUserById(personRequestData.id).subscribe(httpObserver);
+      });
+
+      it('update User', () => {
+        service.updateUserById(personRequestData).subscribe(httpObserver);
+      });
+    });
+
+    describe('when fail request', () => {
+      afterEach(() => {
+        request = httpTestingController.expectOne(personRequestUrl);
+        request.flush(errorMessage, errorResponse);
+        expect(httpObserver.next).not.toHaveBeenCalled();
+        expect(httpObserver.error).toHaveBeenCalled();
+      });
+
+      it('get user', () => {
+        service.getUserById(personRequestData.id).subscribe(httpObserver);
+      });
+
+      it('update User', () => {
+        service.updateUserById(personRequestData).subscribe(httpObserver);
+      });
     });
   });
 });
